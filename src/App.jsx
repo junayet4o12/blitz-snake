@@ -4,36 +4,40 @@ import { BiPause } from 'react-icons/bi';
 import { FaPause, FaPlay } from 'react-icons/fa';
 
 const App = () => {
-  const [level, setLevel] = useState('Medium');
-  const [score, setScore] = useState(0);
-  const [highestScore, setHighestScore] = useState(0); // Initialize highest score state
-  const [snakeBlock, setSnakeBlock] = useState(5);
-  const [boxSize, setBoxSize] = useState(368);
-  const [gameBaseNumber, setBaseNumber] = useState(8);
-  const mediumBase = Math.floor((boxSize / 2) / gameBaseNumber) * gameBaseNumber;
+  const [level, setLevel] = useState('Medium'); // Game difficulty level
+  const [score, setScore] = useState(0); // Current score
+  const [highestScore, setHighestScore] = useState(0); // Highest score state
+  const [snakeLength, setSnakeLength] = useState(5); // Initial snake length
+  const [boardSize, setBoardSize] = useState(368); // Board size in pixels
+  const [gridSize, setGridSize] = useState(8); // Grid size for the board
+  const centerGrid = Math.floor((boardSize / 2) / gridSize) * gridSize; // Center position for the grid
 
+  // Initial food position
   const [foodPosition, setFoodPosition] = useState({
-    x: Math.floor(Math.random() * (boxSize / gameBaseNumber)) * gameBaseNumber,
-    y: Math.floor(Math.random() * (boxSize / gameBaseNumber)) * gameBaseNumber
+    x: Math.floor(Math.random() * (boardSize / gridSize)) * gridSize,
+    y: Math.floor(Math.random() * (boardSize / gridSize)) * gridSize
   });
 
+  // Function to generate an array of specified length
   const generateArray = (num) => {
     if (num < 1) return [];
     return Array.from({ length: num }, (_, index) => index + 1);
   };
 
-  const [snake, setSnake] = useState(generateArray(snakeBlock).map(block => {
-    return { x: -(block - 1) * gameBaseNumber + mediumBase, y: mediumBase };
+  // Initial snake position
+  const [snake, setSnake] = useState(generateArray(snakeLength).map(block => {
+    return { x: -(block - 1) * gridSize + centerGrid, y: centerGrid };
   }));
 
-  const [direction, setDirection] = useState('RIGHT');
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [gameOver, setGameOver] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [isPaused, setIsPaused] = useState(false); // New state for pause functionality
-  const containerRef = useRef(null);
+  const [direction, setDirection] = useState('RIGHT'); // Initial snake direction
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 }); // Container size for the game
+  const [gameOver, setGameOver] = useState(false); // Game over state
+  const [showModal, setShowModal] = useState(false); // Show modal on game over
+  const [gameStarted, setGameStarted] = useState(false); // Game start state
+  const [isPaused, setIsPaused] = useState(false); // Pause state
+  const containerRef = useRef(null); // Reference to the game container
 
+  // Load highest score from local storage on component mount
   useEffect(() => {
     const savedHighestScore = localStorage.getItem('highestScore');
     if (savedHighestScore) {
@@ -41,6 +45,7 @@ const App = () => {
     }
   }, []);
 
+  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
@@ -64,6 +69,7 @@ const App = () => {
     };
   }, []);
 
+  // Game loop
   useEffect(() => {
     if (!gameStarted || gameOver || isPaused) return; // Respect paused state
 
@@ -72,34 +78,38 @@ const App = () => {
         const newSnake = prevSnake.map(segment => ({ ...segment }));
         const head = { ...newSnake[0] };
 
+        // Move snake head based on direction
         switch (direction) {
           case 'RIGHT':
-            head.x += gameBaseNumber;
+            head.x += gridSize;
             break;
           case 'LEFT':
-            head.x -= gameBaseNumber;
+            head.x -= gridSize;
             break;
           case 'UP':
-            head.y -= gameBaseNumber;
+            head.y -= gridSize;
             break;
           case 'DOWN':
-            head.y += gameBaseNumber;
+            head.y += gridSize;
             break;
           default:
             break;
         }
 
+        // Check for collisions with walls
         if (head.x < 0 || head.x >= containerSize.width || head.y < 0 || head.y >= containerSize.height) {
           setGameOver(true);
           setShowModal(true);
           return prevSnake;
         }
 
-        if (head.x < 0) head.x = containerSize.width - gameBaseNumber;
+        // Wrap snake around the edges
+        if (head.x < 0) head.x = containerSize.width - gridSize;
         if (head.x >= containerSize.width) head.x = 0;
-        if (head.y < 0) head.y = containerSize.height - gameBaseNumber;
+        if (head.y < 0) head.y = containerSize.height - gridSize;
         if (head.y >= containerSize.height) head.y = 0;
 
+        // Check for collisions with itself
         if (newSnake.some(segment => segment.x === head.x && segment.y === head.y)) {
           setGameOver(true);
           setShowModal(true);
@@ -108,10 +118,11 @@ const App = () => {
 
         newSnake.unshift(head);
 
+        // Check if snake eats the food
         if (head.x === foodPosition.x && head.y === foodPosition.y) {
           setFoodPosition({
-            x: Math.floor(Math.random() * containerSize.width / gameBaseNumber) * gameBaseNumber,
-            y: Math.floor(Math.random() * containerSize.height / gameBaseNumber) * gameBaseNumber
+            x: Math.floor(Math.random() * containerSize.width / gridSize) * gridSize,
+            y: Math.floor(Math.random() * containerSize.height / gridSize) * gridSize
           });
           setScore(prevScore => {
             const newScore = prevScore + (10 * (level === 'Easy' ? 1 : level === 'Medium' ? 2 : 3));
@@ -130,8 +141,9 @@ const App = () => {
     }, level === 'Easy' ? 200 : level === 'Medium' ? 100 : 50);
 
     return () => clearInterval(interval);
-  }, [direction, containerSize, foodPosition, gameStarted, gameOver, highestScore, level, isPaused]); // Include isPaused
+  }, [direction, containerSize, foodPosition, gameStarted, gameOver, highestScore, level, isPaused]);
 
+  // Handle key presses for controlling the snake and pause functionality
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (!gameStarted || gameOver) return;
@@ -163,25 +175,22 @@ const App = () => {
     };
   }, [direction, gameStarted, gameOver]);
 
+  // Restart game on "Enter" key press
   useEffect(() => {
     const handleKeyDown = (event) => {
-      console.log(event.key);
-
-      if (event.key === 'Enter') {
-        if (showModal === true) {
-          handleRestart();
-        }
+      if (event.key === 'Enter' && showModal) {
+        handleRestart();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
 
-    // Cleanup event listener on component unmount
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [showModal]);
 
+  // Pause the game if the browser tab is not visible
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && gameStarted && !gameOver) {
@@ -196,6 +205,7 @@ const App = () => {
     };
   }, [gameStarted, gameOver]);
 
+  // Start the game
   const handleStart = () => {
     setGameStarted(true);
     setGameOver(false);
@@ -203,44 +213,41 @@ const App = () => {
     setScore(0);
   };
 
+  // Restart the game
   const handleRestart = () => {
     setGameStarted(true);
     setGameOver(false);
     setShowModal(false);
-    setSnake(generateArray(snakeBlock).map(block => {
-      return { x: -(block - 1) * gameBaseNumber + 160, y: 192 };
+    setSnake(generateArray(snakeLength).map(block => {
+      return { x: -(block - 1) * gridSize + 160, y: 192 };
     }));
     setFoodPosition({
-      x: Math.floor(Math.random() * (boxSize / gameBaseNumber)) * gameBaseNumber,
-      y: Math.floor(Math.random() * (boxSize / gameBaseNumber)) * gameBaseNumber
+      x: Math.floor(Math.random() * (boardSize / gridSize)) * gridSize,
+      y: Math.floor(Math.random() * (boardSize / gridSize)) * gridSize
     });
     setDirection('RIGHT');
     setScore(0);
   };
 
-
-
   return (
     <div className="flex flex-col justify-center items-center relative">
-
-      <div className='flex gap-3 pt-4 text-base' style={{ width: `${boxSize}px` }}>
+      <div className='flex gap-3 pt-4 text-base' style={{ width: `${boardSize}px` }}>
         <p className='bg-gray-700 text-white w-max px-2 py-1 font-medium rounded-sm'>Score: {score}</p>
-        <p className='bg-gray-700 text-white w-max px-2 py-1  font-medium rounded-sm'>Highest Score: {highestScore}</p>
+        <p className='bg-gray-700 text-white w-max px-2 py-1 font-medium rounded-sm'>Highest Score: {highestScore}</p>
 
         {(!gameStarted || showModal) ? (
-          <select value={level} onChange={(e) => setLevel(e.target.value)} className='bg-gray-700 text-white w-max px-2 py-1 font-medium rounded-sm ' id="">
+          <select value={level} onChange={(e) => setLevel(e.target.value)} className='bg-gray-700 text-white w-max px-2 py-1 font-medium rounded-sm'>
             <option>Easy</option>
             <option>Medium</option>
             <option>Hard</option>
           </select>
         ) : <button onKeyDown={(e) => e.preventDefault()} onClick={() => setIsPaused(prev => !prev)} className='px-4 py-2 bg-gray-700 text-white rounded w-12 mx-auto'>{isPaused ? <FaPlay /> : <FaPause />}</button>}
-
       </div>
       <h2 className='text-base font-bold'>{level}</h2>
       <div
         ref={containerRef}
         className="relative bg-gray-200 border border-black"
-        style={{ width: `${boxSize}px`, height: `${boxSize}px` }}
+        style={{ width: `${boardSize}px`, height: `${boardSize}px` }}
       >
         {snake.map((segment, index) => (
           <div
@@ -249,8 +256,8 @@ const App = () => {
             style={{
               left: `${segment.x}px`,
               top: `${segment.y}px`,
-              width: `${gameBaseNumber}px`,
-              height: `${gameBaseNumber}px`,
+              width: `${gridSize}px`,
+              height: `${gridSize}px`,
             }}
           ></div>
         ))}
@@ -260,8 +267,8 @@ const App = () => {
           style={{
             left: `${foodPosition.x}px`,
             top: `${foodPosition.y}px`,
-            width: `${gameBaseNumber}px`,
-            height: `${gameBaseNumber}px`,
+            width: `${gridSize}px`,
+            height: `${gridSize}px`,
           }}
         ></div>
 
@@ -274,7 +281,7 @@ const App = () => {
             >
               Restart
             </button>
-            <p className='text-base  mt-4'>Or press "Enter" ot restart.</p>
+            <p className='text-base mt-4'>Or press "Enter" to restart.</p>
           </div>
         )}
         {isPaused && (
@@ -295,7 +302,6 @@ const App = () => {
           </div>
         )}
       </div>
-
       <Controller />
     </div>
   );
