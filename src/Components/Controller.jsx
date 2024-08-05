@@ -28,7 +28,7 @@ const Controller = () => {
             return null;
         }
     };
-    const controllerButtonStyle = 'px-4 py-2 bg-gray-700 text-white rounded w-12 mx-auto'
+    const controllerButtonStyle = 'px-4 py-2 bg-gray-700 text-white rounded w-12 mx-auto transition-all duration-100 active:scale-90 hover:bg-black'
     return (
         < div className="grid grid-cols-1 gap-3 mt-4" >
             <button onClick={() => handleButtonClick('ArrowUp')} className={`${controllerButtonStyle}`}><BiSolidUpArrow /></button>
