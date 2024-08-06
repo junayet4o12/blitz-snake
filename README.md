@@ -1,6 +1,6 @@
 # Blitz Snake
 
-Welcome to Blitz Snake, the ultimate web page game developed by me when I precticing stron functionality. for creating your own forms and collecting data from others.
+Welcome to Blitz Snake, the ultimate web game developed by me while practicing my coding skills to solve stronger functionality.
 
 --> I developed a game using React called Blitz Snake. I created it during my free time while practicing my coding skills. I always try to tackle strong functionality, so I challenged myself to develop a snake game—and I succeeded!
 
