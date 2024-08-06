@@ -244,64 +244,66 @@ const App = () => {
         ) : <button onKeyDown={(e) => e.preventDefault()} onClick={() => setIsPaused(prev => !prev)} className='px-4 py-2 bg-gray-700 text-white rounded w-12 mx-auto'>{isPaused ? <FaPlay /> : <FaPause />}</button>}
       </div>
       <h2 className='text-base font-bold'>{level}</h2>
-      <div
-        ref={containerRef}
-        className="relative bg-gray-200 border border-black"
-        style={{ width: `${boardSize}px`, height: `${boardSize}px` }}
-      >
-        {snake.map((segment, index) => (
+     <div className='p-[1px] bg-black'>
+        <div
+          ref={containerRef}
+          className="relative bg-gray-200"
+          style={{ width: `${boardSize}px`, height: `${boardSize}px` }}
+        >
+          {snake.map((segment, index) => (
+            <div
+              key={index}
+              className="absolute bg-gray-700 rounded-full"
+              style={{
+                left: `${segment.x}px`,
+                top: `${segment.y}px`,
+                width: `${gridSize}px`,
+                height: `${gridSize}px`,
+              }}
+            ></div>
+          ))}
+  
           <div
-            key={index}
-            className="absolute bg-gray-700 rounded-full"
+            className="absolute bg-red-500 rounded-full"
             style={{
-              left: `${segment.x}px`,
-              top: `${segment.y}px`,
+              left: `${foodPosition.x}px`,
+              top: `${foodPosition.y}px`,
               width: `${gridSize}px`,
               height: `${gridSize}px`,
             }}
           ></div>
-        ))}
-
-        <div
-          className="absolute bg-red-500 rounded-full"
-          style={{
-            left: `${foodPosition.x}px`,
-            top: `${foodPosition.y}px`,
-            width: `${gridSize}px`,
-            height: `${gridSize}px`,
-          }}
-        ></div>
-
-        {showModal && (
-          <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-50 text-white text-xl">
-            <div>Game Over</div>
-            <button
-              className="mt-4 px-4 py-2 bg-gray-700 rounded"
-              onClick={handleRestart}
-            >
-              Restart
-            </button>
-            <p className='text-base mt-4'>Or press "Enter" to restart.</p>
-          </div>
-        )}
-        {isPaused && (
-          <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-50 text-white text-xl">
-            <p>Paused.</p>
-            <div className='text-base text-center'>{`Press "Space" or click "Continue Button" to continue`}</div>
-          </div>
-        )}
-
-        {!gameStarted && !gameOver && (
-          <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-xl">
-            <button
-              className="px-4 py-2 bg-gray-700 rounded"
-              onClick={handleStart}
-            >
-              Start Game
-            </button>
-          </div>
-        )}
-      </div>
+  
+          {showModal && (
+            <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-50 text-white text-xl">
+              <div>Game Over</div>
+              <button
+                className="mt-4 px-4 py-2 bg-gray-700 rounded"
+                onClick={handleRestart}
+              >
+                Restart
+              </button>
+              <p className='text-base mt-4'>Or press "Enter" to restart.</p>
+            </div>
+          )}
+          {isPaused && (
+            <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-50 text-white text-xl">
+              <p>Paused.</p>
+              <div className='text-base text-center'>{`Press "Space" or click "Continue Button" to continue`}</div>
+            </div>
+          )}
+  
+          {!gameStarted && !gameOver && (
+            <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 text-white text-xl">
+              <button
+                className="px-4 py-2 bg-gray-700 rounded"
+                onClick={handleStart}
+              >
+                Start Game
+              </button>
+            </div>
+          )}
+        </div>
+     </div>
       <Controller />
     </div>
   );
